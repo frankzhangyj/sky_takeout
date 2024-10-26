@@ -113,4 +113,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return new PageResult(total, employees);
     }
+
+    @Override
+    public void enableOrDisable(Integer status, Long id) {
+        Employee employee = Employee.builder()
+                .status(status)
+                .build();
+
+        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Employee::getId, id);
+
+        employeeMapper.update(employee, queryWrapper);
+    }
 }
