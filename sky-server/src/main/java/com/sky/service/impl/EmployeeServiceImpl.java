@@ -1,17 +1,22 @@
 package com.sky.service.impl;
 
+import com.alibaba.druid.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -49,7 +55,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         //密码比对
-        // TODO 后期需要进行md5加密，然后再进行比对
         password = DigestUtils.md5DigestAsHex(password.getBytes());
 
         if (!password.equals(employee.getPassword())) {
@@ -66,6 +71,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employee;
     }
 
+
     @Override
     public void saveEmployee(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
@@ -81,10 +87,30 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setUpdateTime(LocalDateTime.now());
 
         //设置当前记录创建人id和修改人id
-        //TODO
         employee.setCreateUser(BaseContext.getCurrentId());//目前写个假数据，后期修改
         employee.setUpdateUser(BaseContext.getCurrentId());
 
         employeeMapper.insert(employee);
+    }
+
+    /**
+     * 可以同时使用wrapper和动态sql wrapper可以在java层面对查询构建基本的筛选条件 xml中sql可以提供更复杂的语句提高性能
+     * 对于这个查询可以在自定义sql 使用按时间顺序排列
+     * @param employeePageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult getPage(EmployeePageQueryDTO employeePageQueryDTO) {
+        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(!StringUtils.isEmpty(employeePageQueryDTO.getName()), Employee::getName, employeePageQueryDTO.getName());
+
+        IPage<Employee> page = new Page<>(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
+
+        employeeMapper.selectMyPage(page, employeePageQueryDTO);
+
+        long total = page.getTotal();
+        List<Employee> employees = page.getRecords();
+
+        return new PageResult(total, employees);
     }
 }
