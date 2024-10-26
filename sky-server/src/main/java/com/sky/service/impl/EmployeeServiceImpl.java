@@ -118,12 +118,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void enableOrDisable(Integer status, Long id) {
         Employee employee = Employee.builder()
                 .status(status)
+                .updateTime(LocalDateTime.now())
+                .createUser(BaseContext.getCurrentId())
+                .id(id)
                 .build();
 
-        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Employee::getId, id);
-
-        employeeMapper.update(employee, queryWrapper);
+        employeeMapper.updateById(employee);
     }
 
     @Override
