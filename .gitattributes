@@ -1,0 +1,1 @@
+sky-server/src/main/resources/application-dev.yml filter=git-crypt diff=git-crypt
