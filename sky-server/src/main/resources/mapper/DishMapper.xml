@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.DishMapper">
+    <select id="selectDishPage" resultType="dishVO">
+        select d.* , c.name as categoryName from dish d left outer join category c on d.category_id = c.id
+        <where>
+            <if test="dishPageQueryDTO.name != null">
+                and d.name like concat('%',#{dishPageQueryDTO.name},'%')
+            </if>
+            <if test="dishPageQueryDTO.categoryId != null">
+                and d.category_id = #{dishPageQueryDTO.categoryId}
+            </if>
+            <if test="dishPageQueryDTO.status != null">
+                and d.status = #{dishPageQueryDTO.status}
+            </if>
+        </where>
+        order by d.create_time desc
+    </select>
+</mapper>
