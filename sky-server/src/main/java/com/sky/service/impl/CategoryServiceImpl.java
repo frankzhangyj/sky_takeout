@@ -34,7 +34,6 @@ import java.util.List;
 @Service
 @Slf4j
 public class CategoryServiceImpl implements CategoryService {
-
     @Autowired
     private CategoryMapper categoryMapper;
     @Autowired
