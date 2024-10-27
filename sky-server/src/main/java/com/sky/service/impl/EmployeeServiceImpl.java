@@ -4,14 +4,15 @@ import com.alibaba.druid.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sky.annotation.AutoFill;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
-import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
+import com.sky.enumeration.OperationType;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -46,7 +46,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Employee::getUsername, username);
         Employee employee = employeeMapper.selectOne(queryWrapper);
-//        Employee employee = employeeMapper.getByUsername(username);
 
         //2、处理各种异常情况（用户名不存在、密码不对、账号被锁定）
         if (employee == null) {
@@ -73,22 +72,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     @Override
-    public void saveEmployee(EmployeeDTO employeeDTO) {
-        Employee employee = new Employee();
-
+    @AutoFill(OperationType.INSERT)
+    public void saveEmployee(Employee employee, EmployeeDTO employeeDTO) {
         //对象属性拷贝
         BeanUtils.copyProperties(employeeDTO, employee);
 
         //设置密码，默认密码123456
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
-
-        //设置当前记录的创建时间和修改时间
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-
-        //设置当前记录创建人id和修改人id
-        employee.setCreateUser(BaseContext.getCurrentId());//目前写个假数据，后期修改
-        employee.setUpdateUser(BaseContext.getCurrentId());
 
         employeeMapper.insert(employee);
     }
@@ -115,13 +105,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void enableOrDisable(Integer status, Long id) {
-        Employee employee = Employee.builder()
-                .status(status)
-                .updateTime(LocalDateTime.now())
-                .createUser(BaseContext.getCurrentId())
-                .id(id)
-                .build();
+    @AutoFill(OperationType.UPDATE)
+    public void enableOrDisable(Employee employee, Integer status, Long id) {
+        employee.setId(id);
+        employee.setStatus(status);
 
         employeeMapper.updateById(employee);
     }
@@ -133,12 +120,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void updateEmployeeDetail(EmployeeDTO employeeDTO) {
-        Employee employee = new Employee();
+    @AutoFill(OperationType.UPDATE)
+    public void updateEmployeeDetail(Employee employee, EmployeeDTO employeeDTO) {
         BeanUtils.copyProperties(employeeDTO, employee);
-
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(BaseContext.getCurrentId());
 
         employeeMapper.updateById(employee);
     }

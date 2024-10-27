@@ -34,7 +34,7 @@ public class CategoryController {
     @ApiOperation("新增分类")
     public Result<String> save(@RequestBody CategoryDTO categoryDTO){
         log.info("新增分类：{}", categoryDTO);
-        categoryService.save(categoryDTO);
+        categoryService.save(new Category(), categoryDTO);
         return Result.success();
     }
 
@@ -72,7 +72,7 @@ public class CategoryController {
     @PutMapping
     @ApiOperation("修改分类")
     public Result<String> update(@RequestBody CategoryDTO categoryDTO){
-        categoryService.update(categoryDTO);
+        categoryService.update(new Category(), categoryDTO);
         return Result.success();
     }
 
@@ -85,7 +85,7 @@ public class CategoryController {
     @PostMapping("/status/{status}")
     @ApiOperation("启用禁用分类")
     public Result<String> startOrStop(@PathVariable("status") Integer status, Long id){
-        categoryService.enableOrDisable(status,id);
+        categoryService.enableOrDisable(new Category(), status,id);
         return Result.success();
     }
 

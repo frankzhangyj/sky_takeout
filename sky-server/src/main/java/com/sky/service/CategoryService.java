@@ -3,6 +3,7 @@ package com.sky.service;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.Category;
+import com.sky.entity.Employee;
 import com.sky.result.PageResult;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface CategoryService {
      * 新增分类
      * @param categoryDTO
      */
-    void save(CategoryDTO categoryDTO);
+    void save(Category category, CategoryDTO categoryDTO);
 
     /**
      * 分页查询
@@ -31,14 +32,14 @@ public interface CategoryService {
      * 修改分类
      * @param categoryDTO
      */
-    void update(CategoryDTO categoryDTO);
+    void update(Category category, CategoryDTO categoryDTO);
 
     /**
      * 启用、禁用分类
      * @param status
      * @param id
      */
-    void enableOrDisable(Integer status, Long id);
+    void enableOrDisable(Category category, Integer status, Long id);
 
     /**
      * 根据类型查询分类

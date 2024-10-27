@@ -19,7 +19,7 @@ public interface EmployeeService {
      * 保存员工信息
      * @param employeeDTO
      */
-    void saveEmployee(EmployeeDTO employeeDTO);
+    void saveEmployee(Employee employee, EmployeeDTO employeeDTO);
 
     /**
      * 分页查询员工
@@ -33,7 +33,7 @@ public interface EmployeeService {
      * @param status
      * @param id
      */
-    void enableOrDisable(Integer status, Long id);
+    void enableOrDisable(Employee employee, Integer status, Long id);
 
     /**
      * 查询员工信息
@@ -46,5 +46,5 @@ public interface EmployeeService {
      * 更新员工信息
      * @param employeeDTO
      */
-    void updateEmployeeDetail(EmployeeDTO employeeDTO);
+    void updateEmployeeDetail(Employee employee, EmployeeDTO employeeDTO);
 }
