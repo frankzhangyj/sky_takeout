@@ -1,15 +1,21 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.annotation.AutoFill;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
+import com.sky.entity.SetmealDish;
 import com.sky.enumeration.OperationType;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
@@ -30,9 +36,11 @@ import java.util.List;
 @Slf4j
 public class DishServiceImpl implements DishService {
     @Autowired
-    DishMapper dishMapper;
+    private DishMapper dishMapper;
     @Autowired
-    DishFlavorMapper dishFlavorMapper;
+    private DishFlavorMapper dishFlavorMapper;
+    @Autowired
+    private SetmealDishMapper setmealDishMapper;
 
     @AutoFill(OperationType.INSERT)
     @Transactional
@@ -45,6 +53,7 @@ public class DishServiceImpl implements DishService {
         Long id = dish.getId();
 
         List<DishFlavor> flavors = dishDTO.getFlavors();
+        // 批量插入口味 不能使用in
         if (flavors != null && flavors.size() > 0) {
             flavors.forEach(dishFlavor -> {
                 dishFlavor.setDishId(id);
@@ -60,5 +69,66 @@ public class DishServiceImpl implements DishService {
         dishMapper.selectDishPage(page, dishPageQueryDTO);
 
         return new PageResult(page.getTotal(), page.getRecords());
+    }
+
+    @Override
+    @Transactional
+    public void removeDishes(List<Long> ids) {
+        for (Long id : ids) {
+            Dish dish = dishMapper.selectById(id);
+            if (dish.getStatus() == StatusConstant.ENABLE) {
+                //当前菜品处于起售中，不能删除
+                throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
+            }
+
+            LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(SetmealDish::getDishId, id);
+            List<SetmealDish> setmealDishes = setmealDishMapper.selectList(queryWrapper);
+
+            if (setmealDishes != null && setmealDishes.size() > 0) {
+                //当前菜品被套餐关联了，不能删除
+                throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+            }
+        }
+
+        // 使用in优化批量删除
+        dishMapper.deleteBatchIds(ids);
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(DishFlavor::getDishId, ids);
+        dishFlavorMapper.delete(queryWrapper);
+    }
+
+    @Override
+    @AutoFill(OperationType.UPDATE)
+    public void enableOrDishableDish(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .id(id)
+                .status(status)
+                .build();
+
+        dishMapper.updateById(dish);
+    }
+
+    @Override
+    public DishVO getByIdWithFlavor(Long id) {
+        Dish dish = dishMapper.selectById(id);
+
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DishFlavor::getDishId, id);
+        List<DishFlavor> dishFlavors = dishFlavorMapper.selectList(queryWrapper);
+
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish, dishVO);
+        dishVO.setFlavors(dishFlavors);
+
+        return dishVO;
+    }
+
+    @Override
+    @AutoFill(OperationType.UPDATE)
+    public void updateWithFlavor(Dish dish, DishDTO dishDTO) {
+        BeanUtils.copyProperties(dishDTO, dish);
+
+        dishMapper.updateById(dish);
     }
 }
