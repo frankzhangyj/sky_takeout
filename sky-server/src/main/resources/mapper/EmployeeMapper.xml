@@ -6,7 +6,7 @@
         select * from employee
         <where>
             <if test="employeePageQueryDTO.name != null and employeePageQueryDTO.name != ''">
-                and name like concat('%',#{employeePageQueryDTO.name},'%')
+                and name like concat('%',#{name},'%')
             </if>
         </where>
         order by create_time desc

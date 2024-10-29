@@ -14,12 +14,4 @@ import org.apache.ibatis.annotations.Select;
 public interface DishMapper extends BaseMapper<Dish> {
     IPage<DishVO> selectDishPage(IPage<DishVO> page, @Param("dishPageQueryDTO") DishPageQueryDTO dishPageQueryDTO);
 
-    /**
-     * 根据分类id查询菜品数量
-     * @param categoryId
-     * @return
-     */
-//    @Select("select count(id) from dish where category_id = #{categoryId}")
-//    Integer countByCategoryId(Long categoryId);
-
 }

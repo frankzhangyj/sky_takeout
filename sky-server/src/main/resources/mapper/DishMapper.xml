@@ -7,13 +7,13 @@
         select d.* , c.name as categoryName from dish d left outer join category c on d.category_id = c.id
         <where>
             <if test="dishPageQueryDTO.name != null">
-                and d.name like concat('%',#{dishPageQueryDTO.name},'%')
+                and d.name like concat('%',#{name},'%')
             </if>
             <if test="dishPageQueryDTO.categoryId != null">
-                and d.category_id = #{dishPageQueryDTO.categoryId}
+                and d.category_id = #{categoryId}
             </if>
             <if test="dishPageQueryDTO.status != null">
-                and d.status = #{dishPageQueryDTO.status}
+                and d.status = #{status}
             </if>
         </where>
         order by d.create_time desc
