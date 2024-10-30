@@ -73,4 +73,13 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             shoppingCartMapper.insert(shoppingCart);
         }
     }
+
+    @Override
+    public List<ShoppingCart> getCarts() {
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
+        List<ShoppingCart> shoppingCarts = shoppingCartMapper.selectList(queryWrapper);
+
+        return shoppingCarts;
+    }
 }

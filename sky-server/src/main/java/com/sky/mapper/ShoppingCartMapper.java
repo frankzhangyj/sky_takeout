@@ -10,5 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @Date 2024/10/30
  */
 @Mapper
-public class ShoppingCartMapper extends BaseMapper<ShoppingCart> {
+public interface ShoppingCartMapper extends BaseMapper<ShoppingCart> {
 }
