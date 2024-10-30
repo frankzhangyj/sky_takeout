@@ -82,4 +82,11 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
         return shoppingCarts;
     }
+
+    @Override
+    public void removeShoppingCart() {
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
+        shoppingCartMapper.delete(queryWrapper);
+    }
 }

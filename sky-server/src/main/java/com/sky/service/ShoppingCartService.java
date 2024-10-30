@@ -23,4 +23,9 @@ public interface ShoppingCartService {
      * @return
      */
     List<ShoppingCart> getCarts();
+
+    /**
+     * 清空购物车中的信息
+     */
+    void removeShoppingCart();
 }
