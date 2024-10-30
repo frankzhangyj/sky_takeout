@@ -173,4 +173,17 @@ public class DishServiceImpl implements DishService {
 
         return dishVOS;
     }
+
+    @Override
+    public List<Dish> listDishes(Long categoryId) {
+
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Dish::getCategoryId, categoryId)
+                .eq(Dish::getStatus, StatusConstant.ENABLE)
+                .orderByDesc(Dish::getCreateTime);
+
+        List<Dish> dishes = dishMapper.selectList(queryWrapper);
+
+        return dishes;
+    }
 }
