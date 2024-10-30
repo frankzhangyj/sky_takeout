@@ -22,6 +22,7 @@ import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,8 @@ public class DishServiceImpl implements DishService {
     private DishFlavorMapper dishFlavorMapper;
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @AutoFill(OperationType.INSERT)
     @Transactional
@@ -135,6 +138,14 @@ public class DishServiceImpl implements DishService {
 
     @Override
     public List<DishVO> listWithFlavor(Long categoryId) {
+        // 查找缓存中是否存在这个类型下的菜品集合
+        String key = "dish_" + categoryId;
+        List<DishVO> dishVOS = (List<DishVO>) redisTemplate.opsForValue().get(key);
+
+        if (dishVOS != null) {
+            return dishVOS;
+        }
+
         // 根据分类id得到启售中的菜品
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Dish::getCategoryId, categoryId)
@@ -142,7 +153,7 @@ public class DishServiceImpl implements DishService {
 
         List<Dish> dishes = dishMapper.selectList(queryWrapper);
 
-        List<DishVO> dishVOS = new ArrayList<>();
+        dishVOS = new ArrayList<>();
 
         // 得到每个菜品的口味
         for (Dish dish : dishes) {
@@ -156,6 +167,9 @@ public class DishServiceImpl implements DishService {
             dishVO.setFlavors(dishFlavors);
             dishVOS.add(dishVO);
         }
+
+        // 将查询的信息添加到缓存中
+        redisTemplate.opsForValue().set(key, dishVOS);
 
         return dishVOS;
     }

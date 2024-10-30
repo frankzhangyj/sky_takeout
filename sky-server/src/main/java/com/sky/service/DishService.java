@@ -53,7 +53,8 @@ public interface DishService {
 
     /**
      * 根据分类id查询所有菜品带所有菜品所有口味
-     * @param dish
+     * 通过redis缓存减少数据库查询
+     * @param categoryId
      * @return
      */
     List<DishVO> listWithFlavor(Long categoryId);
