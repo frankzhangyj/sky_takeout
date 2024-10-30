@@ -10,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class SetmealController {
      */
     @PostMapping
     @ApiOperation("新增套餐")
+    @CacheEvict(cacheNames = "setmealCache",key = "#setmealDTO.categoryId")
     public Result saveSetmeal(@RequestBody SetmealDTO setmealDTO) {
         setmealService.saveWithDish(setmealDTO);
         return Result.success();
@@ -45,7 +47,7 @@ public class SetmealController {
      */
     @GetMapping("/page")
     @ApiOperation("分页查询")
-    public Result<PageResult> page(SetmealPageQueryDTO setmealPageQueryDTO) {
+    public Result<PageResult> pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
         PageResult pageResult = setmealService.pageQuery(setmealPageQueryDTO);
         return Result.success(pageResult);
     }
@@ -57,7 +59,8 @@ public class SetmealController {
      */
     @DeleteMapping
     @ApiOperation("批量删除套餐")
-    public Result delete(@RequestParam List<Long> ids){
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
+    public Result removeSetmeal(@RequestParam List<Long> ids){
         setmealService.removeSetmeals(ids);
         return Result.success();
     }
@@ -83,6 +86,7 @@ public class SetmealController {
      */
     @PutMapping
     @ApiOperation("修改套餐")
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public Result update(@RequestBody SetmealDTO setmealDTO) {
         setmealService.updateSetmeal(setmealDTO);
         return Result.success();
@@ -96,6 +100,7 @@ public class SetmealController {
      */
     @PostMapping("/status/{status}")
     @ApiOperation("套餐起售停售")
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public Result enableOrDisableSetmeal(@PathVariable Integer status, Long id) {
         setmealService.enableOrDisableSetmeal(status, id);
         return Result.success();
