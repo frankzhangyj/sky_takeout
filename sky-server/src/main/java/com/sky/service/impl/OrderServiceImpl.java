@@ -128,7 +128,7 @@ public class OrderServiceImpl implements OrderService {
         if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
             throw new OrderBusinessException("该订单已支付");
         }*/
-        // TODO 重新处理微信支付
+        // TODO 跳过微信支付(不需要先预支付 支付后微信支付再调用回调函数调用paySuccess) 直接支付成功
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("code", "ORDERPAID");
         OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
@@ -144,12 +144,9 @@ public class OrderServiceImpl implements OrderService {
         //获取订单号码
         String orderNumber = ordersPaymentDTO.getOrderNumber();
 
-        log.info("调用update，用于替换微信支付更新数据库状态的问题");
-        LambdaUpdateWrapper<Orders> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Orders::getNumber, orderNumber)
-                .set(Orders::getStatus, OrderStatus)
-                .set(Orders::getPayStatus, OrderPaidStatus)
-                .set(Orders::getCheckoutTime, check_out_time);
+        log.info("调用paySuccess，用于替换微信支付更新数据库状态的问题");
+        // 跳过微信支付的回调函数 直接修改订单支付成功信息
+        paySuccess(orderNumber);
         return vo;
     }
 
