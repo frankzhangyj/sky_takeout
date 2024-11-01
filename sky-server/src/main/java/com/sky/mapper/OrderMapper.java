@@ -5,6 +5,8 @@ import com.sky.entity.Orders;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Map;
+
 /**
  * @Description
  * @Author frank
@@ -18,4 +20,11 @@ public interface OrderMapper extends BaseMapper<Orders> {
      */
     @Select("select count(id) from orders where status = #{status}")
     Integer countStatus(Integer status);
+
+    /**
+     * 计算每一天营业额
+     * @param map
+     * @return
+     */
+    Double sumByMap(Map map);
 }

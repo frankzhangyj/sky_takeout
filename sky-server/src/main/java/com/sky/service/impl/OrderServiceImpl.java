@@ -399,7 +399,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void confirm(OrdersConfirmDTO ordersConfirmDTO) {
         Orders orders = new Orders();
-        orders.setId(orders.getId());
+        orders.setId(ordersConfirmDTO.getId());
         orders.setStatus(Orders.CONFIRMED);
         orderMapper.updateById(orders);
     }

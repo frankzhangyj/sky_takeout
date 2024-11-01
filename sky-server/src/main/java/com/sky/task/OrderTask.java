@@ -32,7 +32,7 @@ public class OrderTask {
         LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(-15);
         // 查找未支付超过15分钟订单
         LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Orders::getPayStatus, Orders.PENDING_PAYMENT)
+        queryWrapper.eq(Orders::getPayStatus, Orders.UN_PAID)
                 .lt(Orders::getOrderTime, localDateTime);
         List<Orders> orders = orderMapper.selectList(queryWrapper);
         // 取消支付超时订单
