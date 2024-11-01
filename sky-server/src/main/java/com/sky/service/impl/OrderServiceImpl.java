@@ -220,7 +220,8 @@ public class OrderServiceImpl implements OrderService {
         // 分页查询当前用户要求订单状态下的所有订单 默认全查
         LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(status != null, Orders::getStatus, status)
-                .eq(Orders::getUserId, BaseContext.getCurrentId());
+                .eq(Orders::getUserId, BaseContext.getCurrentId())
+                        .orderByDesc(Orders::getOrderTime);
         orderMapper.selectPage(page, queryWrapper);
 
         List<OrderVO> list = new ArrayList<>();
@@ -541,5 +542,21 @@ public class OrderServiceImpl implements OrderService {
             //配送距离超过100km
             throw new OrderBusinessException("超出配送范围");
         }
+    }
+
+    @Override
+    public void reminder(Long id) {
+        // 查询订单是否存在
+        Orders orders = orderMapper.selectById(id);
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //基于WebSocket实现催单
+        Map map = new HashMap();
+        map.put("type", 2);//2代表用户催单
+        map.put("orderId", id);
+        map.put("content", "订单号：" + orders.getNumber());
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
 }
