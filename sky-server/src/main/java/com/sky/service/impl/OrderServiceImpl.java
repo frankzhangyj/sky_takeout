@@ -250,9 +250,6 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
 
-        Orders orders1 = new Orders();
-        orders1.setId(orders.getId());
-
         // 若状态未接单 直接退款
         if (orders.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
             // 微信退款
@@ -261,13 +258,14 @@ public class OrderServiceImpl implements OrderService {
                     new BigDecimal(0.01),
                     new BigDecimal(0.01));*/
             log.info("申请退款");
-            orders1.setPayStatus(Orders.REFUND);
         }
 
         // 设置订单状态取消
-        orders1.setStatus(Orders.CANCELLED);
+        orders.setStatus(Orders.CANCELLED);
         orders.setCancelReason("用户取消");
-        orders1.setCancelTime(LocalDateTime.now());
+        orders.setCancelTime(LocalDateTime.now());
+        orders.setPayStatus(Orders.REFUND);
+
         orderMapper.updateById(orders);
     }
 
@@ -389,24 +387,23 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Integer payStatus = orders.getPayStatus();
-        Orders orders1 = new Orders();
         if (payStatus == Orders.PAID) {
             // 微信退款
             /*WeChatPayUtil.refund(orders.getNumber(),
                     orders.getNumber(),
                     new BigDecimal(0.01),
                     new BigDecimal(0.01));*/
+            orders.setPayStatus(Orders.REFUND);
             log.info("申请退款");
-            orders1.setPayStatus(Orders.REFUND);
         }
 
 
-        orders1.setId(orders.getId());
-        orders1.setStatus(Orders.CANCELLED);
-        orders1.setRejectionReason(ordersRejectionDTO.getRejectionReason());
-        orders1.setCancelTime(LocalDateTime.now());
+        orders.setId(orders.getId());
+        orders.setStatus(Orders.CANCELLED);
+        orders.setRejectionReason(ordersRejectionDTO.getRejectionReason());
+        orders.setCancelTime(LocalDateTime.now());
 
-        orderMapper.updateById(orders1);
+        orderMapper.updateById(orders);
     }
 
     @Override
@@ -414,7 +411,6 @@ public class OrderServiceImpl implements OrderService {
         Orders orders = orderMapper.selectById(ordersCancelDTO.getId());
 
         Integer payStatus = orders.getPayStatus();
-        Orders orders1 = new Orders();
         if (payStatus == Orders.PAID) {
             // 微信退款
             /*WeChatPayUtil.refund(orders.getNumber(),
@@ -422,16 +418,14 @@ public class OrderServiceImpl implements OrderService {
                     new BigDecimal(0.01),
                     new BigDecimal(0.01));*/
             log.info("申请退款");
-            orders1.setPayStatus(Orders.REFUND);
+            orders.setPayStatus(Orders.REFUND);
         }
 
+        orders.setStatus(Orders.CANCELLED);
+        orders.setRejectionReason(ordersCancelDTO.getCancelReason());
+        orders.setCancelTime(LocalDateTime.now());
 
-        orders1.setId(orders.getId());
-        orders1.setStatus(Orders.CANCELLED);
-        orders1.setRejectionReason(ordersCancelDTO.getCancelReason());
-        orders1.setCancelTime(LocalDateTime.now());
-
-        orderMapper.updateById(orders1);
+        orderMapper.updateById(orders);
     }
 
     @Override
@@ -443,6 +437,7 @@ public class OrderServiceImpl implements OrderService {
         }
         // 更新订单状态,状态转为派送中
         orders.setStatus(Orders.DELIVERY_IN_PROGRESS);
+        orders.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(60));
         orderMapper.updateById(orders);
     }
 
