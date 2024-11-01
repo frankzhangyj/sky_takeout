@@ -5,7 +5,6 @@ import com.sky.constant.MessageConstant;
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -36,7 +35,7 @@ public class OrderTask {
         queryWrapper.eq(Orders::getPayStatus, Orders.PENDING_PAYMENT)
                 .lt(Orders::getOrderTime, localDateTime);
         List<Orders> orders = orderMapper.selectList(queryWrapper);
-
+        // 取消支付超时订单
         if (orders != null && orders.size() > 0) {
             orders.forEach(order -> {
                 order.setStatus(Orders.CANCELLED);
@@ -60,7 +59,7 @@ public class OrderTask {
         queryWrapper.eq(Orders::getStatus, Orders.DELIVERY_IN_PROGRESS)
                 .lt(Orders::getEstimatedDeliveryTime, localDateTime);
         List<Orders> orders = orderMapper.selectList(queryWrapper);
-
+        // 取消派送超时订单
         if (orders != null && orders.size() > 0) {
             orders.forEach(order -> {
                 order.setStatus(Orders.COMPLETED);
