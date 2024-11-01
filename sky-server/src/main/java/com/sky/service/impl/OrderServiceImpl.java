@@ -374,11 +374,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void confirm(OrdersConfirmDTO ordersConfirmDTO) {
-        LambdaUpdateWrapper<Orders> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Orders::getId, ordersConfirmDTO.getId())
-                .set(Orders::getStatus, Orders.CONFIRMED);
-
-        orderMapper.update(updateWrapper);
+        Orders orders = new Orders();
+        orders.setId(orders.getId());
+        orders.setStatus(Orders.CONFIRMED);
+        orderMapper.updateById(orders);
     }
 
     @Override
