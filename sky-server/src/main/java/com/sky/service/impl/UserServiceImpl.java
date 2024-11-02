@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService {
     //微信服务接口地址
     private static final String WX_LOGIN = "https://api.weixin.qq.com/sns/jscode2session";
 
+    // TODO 如何获取微信用户登录信息
     @Override
     public User wxLogin(UserLoginDTO userLoginDTO) {
         String openid = getOpenid(userLoginDTO.getCode());
