@@ -349,7 +349,7 @@ public class OrderServiceImpl implements OrderService {
     private IPage<Orders> pageQueryOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
         IPage<Orders> page = new Page<>(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
         LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Orders::getUserId, BaseContext.getCurrentId())
+        queryWrapper.eq(ordersPageQueryDTO.getUserId() != null, Orders::getUserId, ordersPageQueryDTO.getUserId())
                 .eq(ordersPageQueryDTO.getNumber() != null, Orders::getId, ordersPageQueryDTO.getNumber())
                 .eq(ordersPageQueryDTO.getPhone() != null, Orders::getPhone, ordersPageQueryDTO.getPhone())
                 .eq(ordersPageQueryDTO.getStatus() != null, Orders::getStatus, ordersPageQueryDTO.getStatus())
