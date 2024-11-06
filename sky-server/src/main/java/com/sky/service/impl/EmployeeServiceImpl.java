@@ -8,9 +8,11 @@ import com.sky.annotation.AutoFill;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
+import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.Employee;
 import com.sky.enumeration.OperationType;
 import com.sky.exception.AccountLockedException;
@@ -18,6 +20,7 @@ import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
+import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +44,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee login(EmployeeLoginDTO employeeLoginDTO) {
         String username = employeeLoginDTO.getUsername();
         String password = employeeLoginDTO.getPassword();
-
         //1、根据用户名查询数据库中的数据
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Employee::getUsername, username);
@@ -125,5 +127,40 @@ public class EmployeeServiceImpl implements EmployeeService {
         BeanUtils.copyProperties(employeeDTO, employee);
 
         employeeMapper.updateById(employee);
+    }
+
+    // TODO 修改密码
+    @Override
+    @AutoFill(OperationType.UPDATE)
+    public Result updateEmployeePWD(Employee employee, PasswordEditDTO passwordEditDTO) {
+
+        Long empId = BaseContext.getCurrentId();
+        employee.setId(empId);
+
+        Employee employee1 = employeeMapper.selectById(empId);
+
+        String empPwd = employee1.getPassword();
+        String oldPwd = passwordEditDTO.getOldPassword();
+        String newPwd = passwordEditDTO.getNewPassword();
+
+        //密码比对
+        oldPwd = DigestUtils.md5DigestAsHex(oldPwd.getBytes());
+        newPwd = DigestUtils.md5DigestAsHex(newPwd.getBytes());
+
+
+        if (!oldPwd.equals(empPwd)) {
+            //密码错误
+            throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
+        }
+
+        if (employee.getStatus() == StatusConstant.DISABLE) {
+            //账号被锁定
+            throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
+        }
+
+        employee.setPassword(newPwd);
+
+        employeeMapper.updateById(employee);
+        return Result.success();
     }
 }
