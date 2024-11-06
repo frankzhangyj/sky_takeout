@@ -56,7 +56,7 @@ public class DishController {
     @ApiOperation("启售禁售")
     public Result enableOrDishableDish(@PathVariable Integer status, @RequestParam Long id) {
         log.info("启售禁售");
-        dishService.enableOrDishableDish(status, id);
+        dishService.enableOrDishableDish(new Dish(), status, id);
 
         //将所有的菜品缓存数据清理掉，所有以dish_开头的key
         cleanCache("dish_*");

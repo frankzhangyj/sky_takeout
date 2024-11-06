@@ -63,8 +63,8 @@ public class SetmealServiceImpl implements SetmealService {
     @Override
     @Transactional
     @AutoFill(OperationType.INSERT)
-    public void saveWithDish(SetmealDTO setmealDTO) {
-        Setmeal setmeal = new Setmeal();
+    public void saveWithDish(Setmeal setmeal, SetmealDTO setmealDTO) {
+        setmeal = new Setmeal();
         BeanUtils.copyProperties(setmealDTO, setmeal);
         // 插入套餐表
         setmealMapper.insert(setmeal);
@@ -124,8 +124,7 @@ public class SetmealServiceImpl implements SetmealService {
     @Override
     @Transactional
     @AutoFill(OperationType.UPDATE)
-    public void updateSetmeal(SetmealDTO setmealDTO) {
-        Setmeal setmeal = new Setmeal();
+    public void updateSetmeal(Setmeal setmeal, SetmealDTO setmealDTO) {
         BeanUtils.copyProperties(setmealDTO, setmeal);
         // 更新套餐表
         setmealMapper.updateById(setmeal);

@@ -33,7 +33,7 @@ public interface SetmealService {
      * 向套餐中报错菜品信息
      * @param setmealDTO
      */
-    void saveWithDish(SetmealDTO setmealDTO);
+    void saveWithDish(Setmeal setmeal, SetmealDTO setmealDTO);
 
     /**
      * 分页查询套餐
@@ -59,7 +59,7 @@ public interface SetmealService {
      * 更新套餐
      * @param setmealDTO
      */
-    void updateSetmeal(SetmealDTO setmealDTO);
+    void updateSetmeal(Setmeal setmeal, SetmealDTO setmealDTO);
 
     /**
      * 启售禁售套餐

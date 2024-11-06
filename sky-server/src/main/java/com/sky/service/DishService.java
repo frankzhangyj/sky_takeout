@@ -35,7 +35,7 @@ public interface DishService {
      * @param status
      * @param id
      */
-    void enableOrDishableDish(Integer status, Long id);
+    void enableOrDishableDish(Dish dish, Integer status, Long id);
 
     /**
      * 得到DsihVO用于回显

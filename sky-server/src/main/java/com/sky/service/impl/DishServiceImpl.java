@@ -104,11 +104,9 @@ public class DishServiceImpl implements DishService {
 
     @Override
     @AutoFill(OperationType.UPDATE)
-    public void enableOrDishableDish(Integer status, Long id) {
-        Dish dish = Dish.builder()
-                .id(id)
-                .status(status)
-                .build();
+    public void enableOrDishableDish(Dish dish, Integer status, Long id) {
+        dish.setId(id);
+        dish.setStatus(status);
 
         dishMapper.updateById(dish);
     }
