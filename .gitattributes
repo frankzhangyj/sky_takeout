@@ -1,1 +1,2 @@
 sky-server/src/main/resources/application-dev.yml filter=git-crypt diff=git-crypt
+sky-server/src/main/resources/application-prod.yml filter=git-crypt diff=git-crypt
